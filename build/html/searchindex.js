@@ -1,1 +1,0 @@
-Search.setIndex({objects:{},terms:{index:0,search:0,welcom:0,memo:0,indic:0,page:0,content:0,tech:0,tabl:0,document:0,modul:0},objtypes:{},titles:["Welcome to tech-memo&#8217;s documentation!"],objnames:{},filenames:["index"]})
