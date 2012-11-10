@@ -1,15 +1,14 @@
-.. tech-memo documentation master file, created by
-   sphinx-quickstart on Mon Nov 05 21:24:36 2012.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
 
-Welcome to tech-memo's documentation!
+Welcome to tech-memo!
 =====================================
 
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 2
+
+    web_server.rst
+
 
 
 
