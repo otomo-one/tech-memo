@@ -7,8 +7,8 @@ Contents:
 .. toctree::
     :maxdepth: 2
 
-    network_programming.rst
-    web_server.rst
+    network/network_programming.rst
+    server/web_server.rst
 
 
 

@@ -10,3 +10,4 @@ Webサーバ
     :maxdepth: 2
 
     nginx.rst
+    centos_network.rst

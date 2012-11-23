@@ -1,0 +1,257 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>libevent &mdash; tech-memo 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="tech-memo 0.0.1 documentation" href="../index.html" />
+    <link rel="up" title="ネットワークプログラミング" href="network_programming.html" />
+    <link rel="next" title="Webサーバ" href="../server/web_server.html" />
+    <link rel="prev" title="ネットワークプログラミング" href="network_programming.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../server/web_server.html" title="Webサーバ"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="network_programming.html" title="ネットワークプログラミング"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">tech-memo 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="network_programming.html" accesskey="U">ネットワークプログラミング</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="libevent">
+<h1>libevent<a class="headerlink" href="#libevent" title="Permalink to this headline">¶</a></h1>
+<p>シングルスレッド＋イベント駆動＋ノンブロッキング呼び出しなライブラリ。</p>
+<div class="section" id="id1">
+<h2>インストール<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>環境はUbuntu 12.04 LTS</p>
+<p>ライブラリは <a class="reference external" href="http://libevent.org/">本家</a> から落としてくるか、</p>
+<div class="highlight-python"><pre>$ wget https://github.com/downloads/libevent/libevent/libevent-2.0.20-stable.tar.gz</pre>
+</div>
+<p>展開して設定→インストール</p>
+<div class="highlight-python"><pre>$ tar xvzf libevent-2.0.20-stable.tar.gz
+$ cd libevent-2.0.20-stable
+$ ./configure
+$ make
+$ make install</pre>
+</div>
+</div>
+<div class="section" id="id3">
+<h2>エコーサーバ<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://www.ninxit.com/blog/2008/02/13/libevent-%E4%BD%BF%E3%81%84%E6%96%B9/">ninxit.blog libevent+使い方</a>
+や
+<a class="reference external" href="http://mythosil.hatenablog.com/entry/20110806/1312644585">in the mythosil Rhythm &amp; Biology. libeventでechoサーバをつくってみた</a>
+を参考にエコーサーバを書いてみた。</p>
+<div class="highlight-python"><pre>$ cat echoserver.c
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;netinet/in.h&gt;
+#include &lt;sys/socket.h&gt;
+#include &lt;sys/types.h&gt;
+
+#include &lt;event.h&gt;
+
+void receive_handler(int client,short event,void *arg){
+    char buf[128];
+    struct event *ev = (struct event*)arg;
+    ssize_t len;
+
+    if(event &amp; EV_READ){
+            if((len = recv(client,buf,127,0))&lt;=0){
+                    event_del(ev);
+                    free(ev);
+                    close(client);
+                    printf("closed\n");
+            }else{
+                    send(client,buf,len,0);
+            }
+    }
+}
+
+void accept_handler(int server,short event, void *arg){
+    struct event *ev;
+    struct sockaddr_in addr;
+    socklen_t len = sizeof(addr);
+
+    if(event &amp; EV_READ){
+            int sock = accept(server,(struct sockaddr*)&amp;addr,&amp;len);
+            ev = (struct event*)malloc(sizeof(struct event));
+            event_set(ev,sock,EV_READ|EV_PERSIST,receive_handler,ev);
+            event_add(ev,NULL);
+            printf("accepted\n");
+    }
+}
+
+int main(){
+    int sock;
+    int port = 1234;
+    struct sockaddr_in in;
+    struct event ev;
+    /* socket */
+    sock = socket(PF_INET, SOCK_STREAM, 0);
+    if(sock&lt;0){
+            perror("socket");
+            return 1;
+    }
+    /* in setting */
+    memset(&amp;in,0,sizeof(in));
+    in.sin_port = htons(port);
+    in.sin_family = AF_INET;
+    in.sin_addr.s_addr = htonl(INADDR_ANY);
+    /* binding */
+    if(bind(sock, (struct sockaddr *)&amp;in,sizeof(in))&lt;0){
+            perror("bind");
+            return 1;
+    }
+    /* listen */
+    if(listen(sock,128)&lt;0){
+            perror("listen");
+            return 1;
+    }
+    /* init libevent */
+    event_init();
+    /* libevent settings */
+    event_set(&amp;ev,sock, EV_READ | EV_PERSIST,accept_handler,&amp;ev);
+    event_add(&amp;ev,NULL);
+    /* dispatch */
+    event_dispatch();
+
+    return 0;
+}</pre>
+</div>
+</div>
+<div class="section" id="id4">
+<h2>実行例<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<p>クライアント側</p>
+<div class="highlight-python"><pre>$ telnet localhost 1234
+Trying 127.0.0.1... Connected to localhost. Escape character is '^]'.
+abc
+abc
+aiueo
+aiueo
+^]
+
+telnet&gt; Connection closed.</pre>
+</div>
+<p>サーバ側</p>
+<div class="highlight-python"><pre>$ ./a.out
+accepted
+closed
+^C</pre>
+</div>
+</div>
+<div class="section" id="id5">
+<h2>参考文献<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference external" href="http://libevent.org/">本家</a></li>
+<li><a class="reference external" href="http://www.ninxit.com/blog/2008/02/13/libevent-%E4%BD%BF%E3%81%84%E6%96%B9/">ninxit.blog libevent+使い方</a></li>
+<li><a class="reference external" href="http://mythosil.hatenablog.com/entry/20110806/1312644585">in the mythosil Rhythm &amp; Biology. libeventでechoサーバをつくってみた</a></li>
+</ul>
+</div></blockquote>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">libevent</a><ul>
+<li><a class="reference internal" href="#id1">インストール</a></li>
+<li><a class="reference internal" href="#id3">エコーサーバ</a></li>
+<li><a class="reference internal" href="#id4">実行例</a></li>
+<li><a class="reference internal" href="#id5">参考文献</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="network_programming.html"
+                        title="previous chapter">ネットワークプログラミング</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../server/web_server.html"
+                        title="next chapter">Webサーバ</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/network/libevent.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../server/web_server.html" title="Webサーバ"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="network_programming.html" title="ネットワークプログラミング"
+             >previous</a> |</li>
+        <li><a href="../index.html">tech-memo 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="network_programming.html" >ネットワークプログラミング</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, otomo.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
