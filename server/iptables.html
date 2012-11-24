@@ -1,0 +1,193 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>iptablesの設定 &mdash; tech-memo 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="tech-memo 0.0.1 documentation" href="../index.html" />
+    <link rel="up" title="サーバ" href="server.html" />
+    <link rel="prev" title="CentOSでいろいろ設定" href="centos_network.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="centos_network.html" title="CentOSでいろいろ設定"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">tech-memo 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="server.html" accesskey="U">サーバ</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="iptables">
+<h1>iptablesの設定<a class="headerlink" href="#iptables" title="Permalink to this headline">¶</a></h1>
+<p>ポートの設定などを行うソフトウェア。</p>
+<div class="section" id="id1">
+<h2>設定確認<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># iptables --list</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id2">
+<h2>設定例<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<p>例えば、</p>
+<blockquote>
+<div><ul class="simple">
+<li>サーバから出て行くパケットは全部通す</li>
+<li>サーバから出て戻ってきた（関連のある）パケットは全部通す</li>
+<li>sshで接続するためにtcpかつポート22番は通す</li>
+<li>Webページの設置のためにtcpかつhttp(ポート80番)は通す</li>
+<li>ping等のためにicmpプロトコルは通す</li>
+<li>それ以外の入ってくるパケットは破棄する</li>
+</ul>
+</div></blockquote>
+<p>を設定してみる。
+環境はCentOS 6.3。
+shファイル。</p>
+<div class="highlight-python"><pre># cat iptables.sh
+# 初期化
+iptables --flush
+
+# 受信
+# 過去に関連あり
+iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+# ssh
+iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+# http
+iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+# icmp
+iptables -A INPUT -p icmp -j ACCEPT
+# のこりは拒否
+iptables -A INPUT -j DROP</pre>
+</div>
+<p>設定を確認すると</p>
+<div class="highlight-python"><pre># iptables --list
+Chain INPUT (policy ACCEPT)
+target     prot opt source               destination
+ACCEPT     all  --  anywhere             anywhere            state RELATED,ESTABLISHED
+ACCEPT     tcp  --  anywhere             anywhere            tcp dpt:ssh
+ACCEPT     tcp  --  anywhere             anywhere            tcp dpt:http
+ACCEPT     icmp --  anywhere             anywhere
+DROP       all  --  anywhere             anywhere
+
+Chain FORWARD (policy ACCEPT)
+target     prot opt source               destination
+
+Chain OUTPUT (policy ACCEPT)
+target     prot opt source               destination</pre>
+</div>
+<p>ポリシーがACCEPTなのでOUTPUTは特にコマンドは必要ない。</p>
+</div>
+<div class="section" id="id3">
+<h2>設定ファイルの保存<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<p>リブートすると設定が消えてしまうので保存するには</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># service iptables save</span>
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line">とする。</div>
+<div class="line">設定ファイルは/etc/rc.d/init.d/にあるiptablesファイル。</div>
+<div class="line">ちなみにiptablesファイルを直接編集することもできる。</div>
+</div>
+</div>
+<div class="section" id="id4">
+<h2>参考文献<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference external" href="http://d.hatena.ne.jp/yamasahi/20100206/1265444193">iptablesの設定　入門編</a></li>
+</ul>
+</div></blockquote>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">iptablesの設定</a><ul>
+<li><a class="reference internal" href="#id1">設定確認</a></li>
+<li><a class="reference internal" href="#id2">設定例</a></li>
+<li><a class="reference internal" href="#id3">設定ファイルの保存</a></li>
+<li><a class="reference internal" href="#id4">参考文献</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="centos_network.html"
+                        title="previous chapter">CentOSでいろいろ設定</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/server/iptables.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="centos_network.html" title="CentOSでいろいろ設定"
+             >previous</a> |</li>
+        <li><a href="../index.html">tech-memo 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="server.html" >サーバ</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, otomo.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

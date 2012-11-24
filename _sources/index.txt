@@ -7,8 +7,9 @@ Contents:
 .. toctree::
     :maxdepth: 2
 
+    machine_learning/machine_learning.rst
     network/network_programming.rst
-    server/web_server.rst
+    server/server.rst
 
 
 
