@@ -23,7 +23,7 @@ Jubatus
 
 ::
 
-    # jubaclassifier --name="tutorial"
+    # jubaclassifier --name=tutorial
 
 クラスタ構成
 ---------------------
