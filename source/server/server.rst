@@ -11,3 +11,4 @@
     apache.rst
     centos_network.rst
     iptables.rst
+    bind.rst

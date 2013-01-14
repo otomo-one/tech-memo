@@ -1,0 +1,274 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>BIND &mdash; tech-memo 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="tech-memo 0.0.1 documentation" href="../index.html" />
+    <link rel="up" title="サーバ" href="server.html" />
+    <link rel="next" title="データベース" href="../database/database.html" />
+    <link rel="prev" title="iptablesの設定" href="iptables.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../database/database.html" title="データベース"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="iptables.html" title="iptablesの設定"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">tech-memo 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="server.html" accesskey="U">サーバ</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="bind">
+<h1>BIND<a class="headerlink" href="#bind" title="Permalink to this headline">¶</a></h1>
+<div class="line-block">
+<div class="line">Berkeley Internet Name Domainの略</div>
+<div class="line">提供する機能はネームサーバとそのキャッシュサーバ</div>
+</div>
+<div class="section" id="dns">
+<h2>DNSの仕組み<a class="headerlink" href="#dns" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://www.fc-lab.com/network/system/dns/">http://www.fc-lab.com/network/system/dns/</a></p>
+</div>
+<div class="section" id="id1">
+<h2>bind インストール<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>bindの本体</p>
+<div class="highlight-python"><pre>yum install bind</pre>
+</div>
+</div>
+<div class="section" id="id2">
+<h2>キャッシュネームサーバ<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<div class="line-block">
+<div class="line">1度問い合わせを行うと一定期間ローカルに問い合わせをキャッシュして上位ネームサーバの軽減を行うソフトウェア</div>
+<div class="line">参考:<a class="reference external" href="http://www.searchman.info/server/sev1070.html">http://www.searchman.info/server/sev1070.html</a></div>
+<div class="line"><br /></div>
+<div class="line">caching-nameserver インストール</div>
+</div>
+<div class="highlight-python"><pre>yum install caching-server</pre>
+</div>
+</div>
+<div class="section" id="bindchroot">
+<h2>BINDのchroot<a class="headerlink" href="#bindchroot" title="Permalink to this headline">¶</a></h2>
+<div class="line-block">
+<div class="line">Linuxシステムファイルの中にBINDだけが使う小さなファイルシステムを仮想的に作ることで</div>
+<div class="line">攻撃を受けて進入された場合に被害をchrootの/var/namedの中だけにくいとめることができるようになる</div>
+<div class="line">参考：<a class="reference external" href="http://linux.kororo.jp/cont/server/bind_chroot.php">http://linux.kororo.jp/cont/server/bind_chroot.php</a></div>
+<div class="line"><br /></div>
+<div class="line">自分で設定することもできるし、パッケージをインストールすることも出来る</div>
+<div class="line"><br /></div>
+<div class="line">bind-chroot インストール</div>
+</div>
+<div class="highlight-python"><pre>yum install bind-chroot</pre>
+</div>
+</div>
+<div class="section" id="id3">
+<h2>BINDの設定<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<div class="line-block">
+<div class="line">chroot以下の設定</div>
+<div class="line"><br /></div>
+<div class="line">./etc/にnamed.confがあるので設定する</div>
+<div class="line">named.confのステートメント一覧</div>
+<div class="line"><a class="reference external" href="http://www.nina.jp/server/redhat/bind/named.conf.html">http://www.nina.jp/server/redhat/bind/named.conf.html</a></div>
+<div class="line"><br /></div>
+<div class="line">directoryからゾーンファイルを読み込む</div>
+<div class="line">chroot環境なので実際には/var/named/chroot/directoryとなる</div>
+<div class="line">設定例</div>
+</div>
+<div class="section" id="named-conf">
+<h3>named.conf<a class="headerlink" href="#named-conf" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><pre>options{
+        version "null";
+        directory "/var/named";
+};
+
+include "/etc/rndc.key";
+
+controls {
+        inet 127.0.0.1 allow {localhost;} keys {rndc-key;};
+};
+
+zone "." IN {
+        type hint;
+        file "named.ca";
+};
+
+zone "localhost" IN {
+        type master;
+        file "local.zone";
+};
+
+zone "0.0.127.in-addr.arpa" IN {
+        type master;
+        file "local.rev";
+};
+
+zone "test.net" IN {
+        type master;
+        file "test.zone";
+};
+
+zone "65.168.192.in-addr.arpa" IN {
+        type master;
+        file "test.rev";
+};
+
+logging{
+        channel default{
+                file "/var/log/named/named.log";
+        };
+        category default {default;};
+};</pre>
+</div>
+</div>
+<div class="section" id="local-zone">
+<h3>local.zone<a class="headerlink" href="#local-zone" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><pre>$TTL 86400
+@ IN SOA localhost. root.localhost. (
+        2013010400 ; serial
+        28800 ; refresh 8h
+        14400 ; retry 4h
+        604800 ; expire 1w
+        86400 ; default_ttl 24h
+);
+  IN NS         localhost.
+  IN A          127.0.0.1</pre>
+</div>
+</div>
+<div class="section" id="local-rev">
+<h3>local.rev<a class="headerlink" href="#local-rev" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><pre>$TTL 86400
+@       IN SOA localhost. root.localhost. (
+        2013010400 ; serial
+        28800 ;
+        14400 ;
+        604800 ;
+        86400 ;
+);
+        IN NS   localhost.
+1       IN PTR  localhost.</pre>
+</div>
+<div class="line-block">
+<div class="line">SELinuxが有効だとnamed.caとかが読み込めないとかあるので設定中は</div>
+<div class="line">/etc/selinux/config</div>
+<div class="line">からSELINUX=disabledにする</div>
+<div class="line"><br /></div>
+<div class="line">named.caはルートサーバの情報で公開しているところに従って設定する</div>
+<div class="line"><br /></div>
+<div class="line">rndcはbindの制御ツールで設定の再読み込みや停止が出来る</div>
+<div class="line">ポートの設定でrndcのポートも空けておかないと動かないので注意</div>
+<div class="line"><br /></div>
+<div class="line">ルータ&#8212;-windows&#8212;-vmware（dns）</div>
+<div class="line">みたいな構成の場合</div>
+<div class="line">設定したドメインに関してのみルータからwindowsに送って</div>
+<div class="line">windows側のvmwareのアダプタの設定でdnsをvmwareに設定してやると繋がる</div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">BIND</a><ul>
+<li><a class="reference internal" href="#dns">DNSの仕組み</a></li>
+<li><a class="reference internal" href="#id1">bind インストール</a></li>
+<li><a class="reference internal" href="#id2">キャッシュネームサーバ</a></li>
+<li><a class="reference internal" href="#bindchroot">BINDのchroot</a></li>
+<li><a class="reference internal" href="#id3">BINDの設定</a><ul>
+<li><a class="reference internal" href="#named-conf">named.conf</a></li>
+<li><a class="reference internal" href="#local-zone">local.zone</a></li>
+<li><a class="reference internal" href="#local-rev">local.rev</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="iptables.html"
+                        title="previous chapter">iptablesの設定</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../database/database.html"
+                        title="next chapter">データベース</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/server/bind.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../database/database.html" title="データベース"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="iptables.html" title="iptablesの設定"
+             >previous</a> |</li>
+        <li><a href="../index.html">tech-memo 0.0.1 documentation</a> &raquo;</li>
+          <li><a href="server.html" >サーバ</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, otomo.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
