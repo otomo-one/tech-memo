@@ -46,6 +46,33 @@ DNSの設定
 
     $ ifconfig
 
+
+sudo
+------
+yumで入れられる
+
+::
+
+    # yum install sudo
+
+sudoerの設定
+
+::
+
+    # visudo
+
+    %wheel      ALL=(ALL)   ALL
+
+
+wheelの設定
+------------
+
+usernameをwheelグループにしてsudoができるように
+
+::
+
+    usermod -G wheel username
+
 ssh
 -------------
 これは共通

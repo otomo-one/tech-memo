@@ -87,6 +87,24 @@ nameserver 192.168.xxx.1</pre>
 <div class="highlight-python"><pre>$ ifconfig</pre>
 </div>
 </div>
+<div class="section" id="sudo">
+<h2>sudo<a class="headerlink" href="#sudo" title="Permalink to this headline">¶</a></h2>
+<p>yumで入れられる</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># yum install sudo</span>
+</pre></div>
+</div>
+<p>sudoerの設定</p>
+<div class="highlight-python"><pre># visudo
+
+%wheel      ALL=(ALL)   ALL</pre>
+</div>
+</div>
+<div class="section" id="wheel">
+<h2>wheelの設定<a class="headerlink" href="#wheel" title="Permalink to this headline">¶</a></h2>
+<p>usernameをwheelグループにしてsudoができるように</p>
+<div class="highlight-python"><pre>usermod -G wheel username</pre>
+</div>
+</div>
 <div class="section" id="ssh">
 <h2>ssh<a class="headerlink" href="#ssh" title="Permalink to this headline">¶</a></h2>
 <p>これは共通</p>
@@ -110,6 +128,8 @@ nameserver 192.168.xxx.1</pre>
   <ul>
 <li><a class="reference internal" href="#">CentOSでいろいろ設定</a><ul>
 <li><a class="reference internal" href="#id1">ネットワーク設定ファイル</a></li>
+<li><a class="reference internal" href="#sudo">sudo</a></li>
+<li><a class="reference internal" href="#wheel">wheelの設定</a></li>
 <li><a class="reference internal" href="#ssh">ssh</a></li>
 </ul>
 </li>
