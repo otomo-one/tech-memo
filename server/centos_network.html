@@ -26,8 +26,9 @@
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <link rel="top" title="tech-memo 0.0.1 documentation" href="../index.html" />
-    <link rel="up" title="Webサーバ" href="web_server.html" />
-    <link rel="prev" title="nginx" href="nginx.html" /> 
+    <link rel="up" title="サーバ" href="server.html" />
+    <link rel="next" title="iptablesの設定" href="iptables.html" />
+    <link rel="prev" title="Apahce" href="apache.html" /> 
   </head>
   <body>
     <div class="related">
@@ -37,10 +38,13 @@
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="nginx.html" title="nginx"
+          <a href="iptables.html" title="iptablesの設定"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="apache.html" title="Apahce"
              accesskey="P">previous</a> |</li>
         <li><a href="../index.html">tech-memo 0.0.1 documentation</a> &raquo;</li>
-          <li><a href="web_server.html" accesskey="U">Webサーバ</a> &raquo;</li> 
+          <li><a href="server.html" accesskey="U">サーバ</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -51,10 +55,14 @@
             
   <div class="section" id="centos">
 <h1>CentOSでいろいろ設定<a class="headerlink" href="#centos" title="Permalink to this headline">¶</a></h1>
-<p>いろいろ触ってみたときのメモです。</p>
+<p>いろいろ触ってみたときのメモです。
+いろいろ追記していきます。</p>
 <div class="section" id="id1">
 <h2>ネットワーク設定ファイル<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-python"><pre># vim /etc/sysconfig/network-scripts/ifcfg-eth0
+<p>ゲートウェイはホストの192.168.xxx.1でも動くはず。
+dhcpの場合はゲートウェイ要らないと思うけど、
+/etc/sysconfig/networkをいじらないといけない？</p>
+<div class="highlight-python"><pre>$ vim /etc/sysconfig/network-scripts/ifcfg-eth0
 
 DEVICE="eth0"#デバイス名（ファイル名の末尾と一致するように）
 BOOTPROTO="static"#固定static,none、自動dhcp
@@ -65,13 +73,18 @@ GATEWAY=192.168.65.2#ルータのアドレス(VMWare使っているので)
 IPADDR=192.168.65.10#IPアドレス
 TYPE="Ethernet"</pre>
 </div>
-<p>再起動</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="c"># /etc/rc.d/init.d/network restart</span>
-</pre></div>
+<p>DNSの設定
+とりあえずルータに投げる。</p>
+<div class="highlight-python"><pre>$ vim /etc/resolve.conf
+
+nameserver 192.168.xxx.1</pre>
 </div>
-<p>確認</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="c"># ifconfig</span>
-</pre></div>
+<p>再起動</p>
+<div class="highlight-python"><pre>$ /etc/rc.d/init.d/network restart</pre>
+</div>
+<p>確認
+-aをつけると動いてないインターフェースも表示される。</p>
+<div class="highlight-python"><pre>$ ifconfig</pre>
 </div>
 </div>
 <div class="section" id="ssh">
@@ -103,8 +116,11 @@ TYPE="Ethernet"</pre>
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="nginx.html"
-                        title="previous chapter">nginx</a></p>
+  <p class="topless"><a href="apache.html"
+                        title="previous chapter">Apahce</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="iptables.html"
+                        title="next chapter">iptablesの設定</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="../_sources/server/centos_network.txt"
@@ -134,10 +150,13 @@ TYPE="Ethernet"</pre>
           <a href="../genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="nginx.html" title="nginx"
+          <a href="iptables.html" title="iptablesの設定"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="apache.html" title="Apahce"
              >previous</a> |</li>
         <li><a href="../index.html">tech-memo 0.0.1 documentation</a> &raquo;</li>
-          <li><a href="web_server.html" >Webサーバ</a> &raquo;</li> 
+          <li><a href="server.html" >サーバ</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
